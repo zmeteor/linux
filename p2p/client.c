@@ -16,7 +16,7 @@
 #include<arpa/inet.h>
 #include<unistd.h>
 
-#define PORT 8888
+#define PORT -1 
 #define MAX 1024
 
 int main()
