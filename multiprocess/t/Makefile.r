@@ -1,1 +1,0 @@
-/home/linux/multiprocess/t/Makefile
