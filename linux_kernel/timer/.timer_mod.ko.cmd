@@ -1,0 +1,1 @@
+cmd_/home/linux_core/timer/timer_mod.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/linux_core/timer/timer_mod.ko /home/linux_core/timer/timer_mod.o /home/linux_core/timer/timer_mod.mod.o
