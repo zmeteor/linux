@@ -1,4 +1,3 @@
-
 项目名称: WE_CHAT
 开发工具: Linux 下vim编译器
 数据库: Mysql
@@ -39,6 +38,6 @@
  6. login.c：       客户端实现用户登录；
  7. chat.c：        客户端实现用户的聊天功能；
  8. interface.c：   客户端界面文件；
- 9. makefile：      客户端编译多文件；
 
 
+Makefile:   make编译
