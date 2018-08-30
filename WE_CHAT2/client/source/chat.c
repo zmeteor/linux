@@ -24,7 +24,6 @@ void* recv_message(void *sockfd)
 		nready = recv(connfd , &message, sizeof(message) , 0);
 		if(nready <= 0)
 		{
-            printf("====\n");
 			printf("您已经异常掉线，请重新登录！\n");
 			close(connfd);
 			exit(0);

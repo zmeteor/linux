@@ -66,7 +66,6 @@ int main(int argc , char* argv[])
 
                 /*首先向服务器发送注册请求*/		
                 send(sockfd,&message,sizeof(message),0);
-                printf("---\n");
                 registerUser(sockfd); //注册
                 break;
             

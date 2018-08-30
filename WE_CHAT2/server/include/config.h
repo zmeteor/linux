@@ -102,7 +102,8 @@ enum Flag{
 /*用户信息结构体*/
 typedef struct Users{
 	char userName[20]; 		//用户名
-	char password[20];      //密码
+	int password[1024];      //密码
+    int passLen;            //长度
     int age;                //年龄
     char sex;               //性别
 	struct sockaddr_in userAddr;	//用户IP地址

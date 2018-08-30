@@ -6,10 +6,27 @@
  ************************************************************************/
 #include "../include/config.h"
 #include "../include/connMysql.h"
+#include "../include/rsa.h"
 
 /*注册处理*/
 int registe(Message *msg , int sockfd)
 {
+    /*发送公钥*/
+    int e;
+    int n;
+    int bytes;
+    int d;
+    
+    Pub pub;
+
+    creatRsa(&e , &n , &bytes , &d);
+
+    pub.e = e;
+    pub.n = n;
+    pub.bytes = bytes;
+
+    send(sockfd , &pub , sizeof(pub) , 0);
+
 	int ret;
     int numbytes;
     char query[1024];   
@@ -35,6 +52,9 @@ int registe(Message *msg , int sockfd)
 	user.userAddr = (*msg).sendAddr;
 	user.sockfd = sockfd;
 	
+    char passWd[1024];
+    decodeMessage(user.passLen / bytes, bytes, user.password, d, n ,passWd);
+
 	if(strlen(user.userName) > 20)
 	{	
 		return INVALID;
@@ -45,7 +65,7 @@ int registe(Message *msg , int sockfd)
 
 	/*检查要注册用户名是否已存在*/
     memset(query, 0, sizeof(query));
-    sprintf(query,"select * from User where UserName='%s';",user.userName);
+    sprintf(query,"select ID from User where UserName='%s';",user.userName);
 
     execQuery(conn , query);
 
@@ -77,7 +97,7 @@ int registe(Message *msg , int sockfd)
 	/*执行插入操作*/
 	time(&timeNow);
     memset(query, 0, sizeof(query));
-    sprintf(query,"insert into User(UserName,Password,Age,Sex,UserAddr,Socket,Speak,RegisterTime)values('%s','%s','%d','%s','%s','%d','%d','%s');",user.userName,user.password,user.age,&user.sex,inet_ntoa(user.userAddr.sin_addr),user.sockfd,user.speak,asctime(gmtime(&timeNow)));
+    sprintf(query,"insert into User(UserName,Password,Age,Sex,UserAddr,Socket,Speak,RegisterTime)values('%s','%s','%d','%s','%s','%d','%d','%s');",user.userName,passWd,user.age,&user.sex,inet_ntoa(user.userAddr.sin_addr),user.sockfd,user.speak,asctime(gmtime(&timeNow)));
 
     execQuery(conn , query);
 

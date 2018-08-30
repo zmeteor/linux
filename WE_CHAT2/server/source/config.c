@@ -57,12 +57,16 @@ char *stateMsg(int stateRet)
 
 void copyUser(User *user1 , User *user2)
 {
+    int i = 0;
 	strcpy((*user1).userName , (*user2).userName);
-	strcpy((*user1).password , (*user2).password);
+    for(i = 0 ; i < (*user2).passLen ; i++)
+    {
+	    (*user1).password[i] = (*user2).password[i];
+
+    }
 	(*user1).userAddr = (*user2).userAddr;
 	(*user1).sockfd = (*user2).sockfd;
 	(*user1).speak = (*user2).speak;
 	strcpy((*user2).registerTime , (*user2).registerTime);
 
 }
-

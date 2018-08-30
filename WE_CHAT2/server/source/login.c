@@ -6,11 +6,28 @@
  ************************************************************************/
 #include "../include/config.h"
 #include "../include/connMysql.h"
+#include "../include/rsa.h"
 
 extern ListNode *userList; //用户在线列表
 
 int loginUser(Message *msg , int sockfd)
 {
+    /*发送公钥*/
+    int e;
+    int n;
+    int bytes;
+    int d;
+    
+    Pub pub;
+
+    creatRsa(&e , &n , &bytes , &d);
+
+    pub.e = e;
+    pub.n = n;
+    pub.bytes = bytes;
+
+    send(sockfd , &pub , sizeof(pub) , 0);
+
     /*声明用户信息*/
     User user;
     char query[1024];
@@ -35,6 +52,10 @@ int loginUser(Message *msg , int sockfd)
         printf("client[%d]退出！\n", sockfd);		
         return FAILED;					
     }				
+
+    char md5Passwd[1024];
+    decodeMessage(user.passLen / bytes, bytes, user.password, d, n ,md5Passwd);
+  
     printf("login numbytes = %d\n",numbytes);
     user.userAddr = (*msg).sendAddr;
     user.sockfd = sockfd;
@@ -46,29 +67,18 @@ int loginUser(Message *msg , int sockfd)
     }
 
     /*检验用户名与密码是否匹配*/
-
-    //创建一个连接句柄并初始化
-    MYSQL *conn;
-    conn = mysql_init(NULL);
-    if(NULL == conn)
-    {
-        fprintf(stderr,"mysql_init() failed\n");
-        exit(1);
-    }
-
-    //创建一个连接
-    if(mysql_real_connect(conn,"127.0.0.1","root","yongheng123.","wechat",0,NULL,0) == NULL)
-    {
-        my_error(conn);
-    }
-
+    int ret;
+        time_t timeNow;
+    
     /*检查要注册用户名是否已存在*/
     memset(query, 0, sizeof(query));
-    sprintf(query,"select * from User where UserName='%s' && Password = '%s';",user.userName,user.password);
-    if(mysql_query(conn,query))
-    {
-        my_error(conn);
-    }
+    sprintf(query,"select ID from User where UserName='%s' && Password = '%s';",user.userName,md5Passwd);
+
+    //连接数据库
+    MYSQL* conn = connMysql();
+        
+    //执行sql语句
+    execQuery(conn , query);
 
     //使用mysql_store_result()或mysql_use_result()函数获得结果集，保存在MYSQL_RES结构体中
     //MYSQL_RES *result = mysql_store_result(conn);

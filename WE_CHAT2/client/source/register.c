@@ -5,12 +5,26 @@
 	> Created Time: 2018年02月25日 星期日 20时29分01秒
  ************************************************************************/
 #include "../include/config.h"
+#include "../include/rsa.h"
+#include "../include/md5.h"
+
+/*注册*/
 
 int registerUser(int sockfd)
 {
+    /*接收公钥*/
+    Pub pub;
+	recv(sockfd , &pub , sizeof(pub) , 0);
+
+    unsigned char clearPasswd[CHARNUM];
+    unsigned char reclearPasswd[CHARNUM];
+    char md5Passwd[CHARNUM];
+    int len;
+    int encoded[CHARNUM];
+
     PasswordLevel level;
     int score = 0;
-    char repasswd[MAX_LINE];
+
 	/*声明用户需要的注册信息*/
 	User user;
 	Message message;
@@ -22,25 +36,41 @@ int registerUser(int sockfd)
     do
     {
 	    printf("请输入注册用户密码：\n");
-	    memset(user.password , 0 , sizeof(user.password));
-        memset(repasswd, 0 , sizeof(repasswd));
-	    scanf("%s" , user.password);
+	    memset(clearPasswd , 0 , sizeof(clearPasswd));
+	    scanf("%s" , clearPasswd);
         printf("请再次输入密码：\n");
-        scanf("%s",repasswd);
-        if(strcmp(user.password,repasswd) == 0)
+	    memset(reclearPasswd , 0 , sizeof(reclearPasswd));
+        scanf("%s",reclearPasswd);
+        if(strcmp(clearPasswd,reclearPasswd) == 0)
         {
-            score=GetPasswordScore(user.password);
+            score=GetPasswordScore(clearPasswd);
             level=GetPasswordLevel(score);
             printf("该密码 %s\n",PasswdLevel(level));
         }
         else
         {
-            printf("密码有误，请重新输入!\n");
+            printf("两次密码不一致，请重新输入!\n");
         }
         
     }while(score < 40);
 
 
+    createMd5(clearPasswd , md5Passwd); //生成md5编码
+
+    len = strlen(md5Passwd);
+
+    while(len % pub.bytes != 0)
+    {
+        md5Passwd[len++] = '\0';
+    }
+
+    user.passLen = len;
+    encodeMessage(len, pub.bytes, md5Passwd, pub.e, pub.n , encoded);  //rsa加密
+    int i;
+    for(i = 0 ; i < len ; i++)
+    {
+        user.password[i] = encoded[i];
+    }
 
     printf("请输入年龄：\n");
     user.age = 0;
@@ -61,6 +91,7 @@ int registerUser(int sockfd)
 	recv(sockfd , &message , sizeof(message) , 0);
 	
 	printf("%s\n",message.content);	
+
 	return message.msgRet;
 }
 

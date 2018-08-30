@@ -4,6 +4,11 @@
 > Mail: 
 > Created Time: 2018年02月23日 星期五 17时29分23秒
 ************************************************************************/
+
+#ifndef _CONFIG_H
+#define _CONFIG_H
+#pragma once
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -114,7 +119,8 @@ enum Flag{
 /*用户信息结构体*/
 typedef struct user{
 	char userName[20]; 		//用户名
-	char password[20];      //密码
+	int password[1024];      //密码
+    int passLen;            //长度
     int age;                //年龄
     char sex;               //性别
 	struct sockaddr_in userAddr;	//用户IP地址
@@ -162,3 +168,5 @@ extern void countRepeat(const char *password, RuleParameter *rp);//填充重复�
 extern int countScore(const RuleParameter *rp);// 计算密码得分
 extern char *PasswdLevel(int level);//输出密码等级
 
+
+#endif
